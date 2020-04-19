@@ -82,7 +82,11 @@ class Controller(object):
         if hasattr(self.app.root, "header_logo"):
             parms["header_logo"] = '/header_logo'
         parms["header_name"] = self._header_name
-        parms["theme"] = self._default_theme
+        if self._default_theme in ['default', 'orange']:
+            parms["theme"] = self._default_theme
+        else:
+            logger.warn('invalid value for DefaultTheme, fallback to default')
+            parms["theme"] = 'default'
 
         # Append template parameters.
         parms.update(kwargs)
