@@ -30,7 +30,7 @@ from future.utils import python_2_unicode_compatible
 from future.utils.surrogateescape import encodefilename, decodefilename
 import pkg_resources
 
-from rdiffweb.core import RdiffError, authorizedkeys
+from rdiffweb.core import authorizedkeys
 from rdiffweb.core.config import BoolOption, read_config, Option
 from rdiffweb.core.i18n import ugettext as _
 from rdiffweb.core.ldap_auth import LdapPasswordStore
@@ -576,7 +576,7 @@ class Store():
         assert password is None or isinstance(password, str)
         # Check if user already exists.
         if self.get_user(user):
-            raise RdiffError(_("User %s already exists." % (user,)))
+            raise ValueError(_("User %s already exists." % (user,)))
 
         # Find a database where to add the user
         logger.debug("adding new user [%s]", user)

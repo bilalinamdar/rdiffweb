@@ -25,25 +25,4 @@ from rdiffweb.core.i18n import ugettext as _
 import cherrypy
 
 
-class RdiffError(Exception):
-    """
-    Standard exception raised by Rdiffweb. The error message is usually
-    displayed to the web interface. Make sure the error message is translated.
-    """
 
-    def __init__(self, message):
-        assert message
-        if isinstance(message, bytes):
-            message = message.decode('utf-8', 'replace')
-        super(RdiffError, self).__init__(message)
-        self.message = message
-
-
-class RdiffWarning(RdiffError):
-    """
-    Generic exception to be used in rdiffweb to show warning message. Those
-    exception are not expected to reach the default page handler. The page
-    should handler this kind of exception and show a warning message to the
-    user.
-    """
-    pass

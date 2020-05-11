@@ -35,12 +35,24 @@ import ldap
 import logging
 import time
 
-from rdiffweb.core import RdiffError
 from rdiffweb.core.i18n import ugettext as _
 from rdiffweb.core.config import Option, BoolOption, IntOption
-#
 
 logger = logging.getLogger(__name__)
+
+
+class LdapError(Exception):
+    """
+    Standard exception raised by Rdiffweb. The error message is usually
+    displayed to the web interface. Make sure the error message is translated.
+    """
+
+    def __init__(self, message):
+        assert message
+        if isinstance(message, bytes):
+            message = message.decode('utf-8', 'replace')
+        super(LdapError, self).__init__(message)
+        self.message = message
 
 
 class LdapPasswordStore():
@@ -96,7 +108,7 @@ class LdapPasswordStore():
                     # Convert nb. days into seconds.
                     if shadow_expire and shadow_expire * 24 * 60 * 60 < time.time():
                         logger.warn("user account %s expired: %s", username, shadow_expire)
-                        raise RdiffError(_('User account %s expired.' % username))
+                        raise LdapError(_('User account %s expired.' % username))
 
                 # Get username
                 dn = r[0][0]
@@ -107,7 +119,7 @@ class LdapPasswordStore():
                     value = dn if self.group_attribute_is_dn else new_username
                     logger.info("check if user [%s] is member of [%s]", value, self.require_group)
                     if not l.compare_s(self.require_group, self.group_attribute, value):
-                        raise RdiffError(_('Permissions denied for user account %s.' % username))
+                        raise LdapError(_('Permissions denied for user account %s.' % username))
             finally:
                 l.unbind_s()
             # Return the username
@@ -202,7 +214,7 @@ class LdapPasswordStore():
                     ldap_msg = e.message['desc']
                 if 'info' in e.message:
                     ldap_msg = e.message['info']
-            raise RdiffError(msg % ldap_msg)
+            raise LdapError(msg % ldap_msg)
 
     def exists(self, username):
         """Check if the user exists in LDAP"""
@@ -227,15 +239,15 @@ class LdapPasswordStore():
 
         # Do nothing if password is empty
         if not password:
-            raise RdiffError(_("Password can't be empty."))
+            raise LdapError(_("Password can't be empty."))
         # Check if users are allowed to change their password in LDAP.
         if not self.allow_password_change:
             logger.warn("authentication backend for user [%s] does not support changing the password", username)
-            raise RdiffError(_("LDAP users are not allowed to change their password."))
+            raise LdapError(_("LDAP users are not allowed to change their password."))
 
         # Check if old_password id valid
         if old_password and not self.are_valid_credentials(username, old_password):
-            raise RdiffError(_("Wrong password."))
+            raise LdapError(_("Wrong password."))
 
         # Update the username password of the given user. If possible.
         return self._set_password_in_ldap(username, old_password, password)
@@ -244,7 +256,7 @@ class LdapPasswordStore():
 
         def change_passwd(l, r):
             if len(r) != 1:
-                raise RdiffError(_("User %s not found." % (username,)))
+                raise LdapError(_("User %s not found." % (username,)))
             # Bind using the user credentials. Throws an exception in case of
             # error.
             if old_password is not None:

@@ -26,8 +26,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import logging
-from rdiffweb.controller import Controller
-from rdiffweb.core import RdiffError, RdiffWarning
+from rdiffweb.controller import Controller, flash
 from rdiffweb.core.i18n import ugettext as _
 
 from builtins import str
@@ -55,10 +54,10 @@ class SSHKeysPlugin(Controller):
             self.app.currentuser.add_authorizedkey(key=kwargs['key'], comment=kwargs.get('title', None))
         except ValueError as e:
             _logger.warn("error adding ssh key", exc_info=1)
-            raise RdiffWarning(str(e))
+            flash(str(e), level='warning')
         except:
             _logger.error("error adding ssh key", exc_info=1)
-            raise RdiffWarning(_("Unknown error while adding the SSH Key"))
+            flash(_("Unknown error while adding the SSH Key"), level='warning')
 
     def _handle_delete(self, **kwargs):
         """
@@ -69,23 +68,18 @@ class SSHKeysPlugin(Controller):
             self.app.currentuser.delete_authorizedkey(kwargs['key'])
         except:
             _logger.warn("error removing ssh key", exc_info=1)
-            raise RdiffWarning(_("Unknown error while removing the SSH Key"))
+            flash(_("Unknown error while removing the SSH Key"))
 
     def render_prefs_panel(self, panelid, **kwargs):  # @UnusedVariable
 
         # Handle action
         params = {}
         if 'action' in kwargs:
-            try:
-                action = kwargs['action']
-                if action == 'add':
-                    self._handle_add(**kwargs)
-                elif action == 'delete':
-                    self._handle_delete(**kwargs)
-            except RdiffWarning as e:
-                params['warning'] = str(e)
-            except RdiffError as e:
-                params['error'] = str(e)
+            action = kwargs['action']
+            if action == 'add':
+                self._handle_add(**kwargs)
+            elif action == 'delete':
+                self._handle_delete(**kwargs)
 
         # Get SSH keys if file exists.
         params["sshkeys"] = []

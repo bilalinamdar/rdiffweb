@@ -23,8 +23,7 @@ to change password ans refresh it's repository view.
 from __future__ import unicode_literals
 
 import logging
-from rdiffweb.controller import Controller
-from rdiffweb.core import RdiffError, RdiffWarning
+from rdiffweb.controller import Controller, flash
 from rdiffweb.core.i18n import ugettext as _
 import re
 
@@ -51,11 +50,11 @@ class PrefsGeneralPanelProvider(Controller):
         Called when changing user password.
         """
         if 'current' not in kwargs or not kwargs['current']:
-            raise RdiffWarning(_("Current password is missing."))
-        if 'new' not in kwargs or not kwargs['new']:
-            raise RdiffWarning(_("New password is missing."))
-        if 'confirm' not in kwargs or not kwargs['confirm']:
-            raise RdiffWarning(_("Confirmation password is missing."))
+            flash(_("Current password is missing."))
+        elif 'new' not in kwargs or not kwargs['new']:
+            flash(_("New password is missing."))
+        elif 'confirm' not in kwargs or not kwargs['confirm']:
+            flash(_("Confirmation password is missing."))
 
         # Check if confirmation is valid.
         if kwargs['new'] != kwargs['confirm']:
@@ -74,13 +73,13 @@ class PrefsGeneralPanelProvider(Controller):
         """
         # Check data.
         if 'email' not in kwargs:
-            raise RdiffWarning(_("Email is undefined."))
+            flash(_("Email is undefined."))
 
         # Parse the email value to extract a valid email. The following method
         # return an empty string if the email is not valid. This RFC also accept
         # local email address without '@'. So we add verification for '@'
         if not PATTERN_EMAIL.match(kwargs['email'].lower()):
-            raise RdiffWarning(_("Invalid email."))
+            flash(_("Invalid email."))
 
         # Update the user's email
         assert self.app.currentuser
@@ -89,7 +88,7 @@ class PrefsGeneralPanelProvider(Controller):
         _logger.info("updating user [%s] email [%s]", username, email)
         self.app.currentuser.email = kwargs['email']
 
-        return {'success': _("Profile updated successfully.")}
+        flash(_("Profile updated successfully."))
 
     def _handle_update_repos(self):
         """
@@ -113,11 +112,7 @@ class PrefsGeneralPanelProvider(Controller):
                 else:
                     _logger.info("unknown action: %s", action)
                     raise cherrypy.NotFound("Unknown action")
-            except RdiffWarning as e:
-                params['warning'] = str(e)
-            except RdiffError as e:
-                params['error'] = str(e)
-            except Exception as e:
+            except:
                 _logger.warning("unknown error processing action", exc_info=True)
                 params['error'] = _("Unknown error")
 

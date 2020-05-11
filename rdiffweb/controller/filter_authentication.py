@@ -28,8 +28,7 @@ import cherrypy
 from cherrypy._cptools import HandlerTool
 from future.utils import native_str
 
-from rdiffweb.controller import Controller
-from rdiffweb.core import RdiffError, RdiffWarning
+from rdiffweb.controller import Controller, flash
 from rdiffweb.core.i18n import ugettext as _
 from rdiffweb.core.rdw_helpers import quote_url
 from rdiffweb.core.config import Option
@@ -61,10 +60,10 @@ class BaseAuth(HandlerTool):
             userobj = cherrypy.request.app.store.login(username, password)  # @UndefinedVariable
         except:
             logger.exception("fail to validate user credential")
-            raise RdiffWarning(_("Fail to validate user credential."))
+            flash(_("Fail to validate user credential."))
         if not userobj:
             logger.warning("invalid username [%s] or password", username)
-            raise RdiffWarning(_("Invalid username or password."))
+            flash(_("Invalid username or password."))
         return userobj
 
     def do_login(self, login, password, **kwargs):
@@ -139,7 +138,7 @@ class AuthFormTool(BaseAuth):
         response = cherrypy.serving.response
         try:
             super(AuthFormTool, self).do_login(login, password, **kwargs)
-        except RdiffError as e:
+        except Exception as e:
             body = LoginPage().index(redirect, login, str(e))
             response.body = body
             if "Content-Length" in response.headers:
@@ -209,7 +208,7 @@ class BasicAuth(BaseAuth):
                         self.do_login(login, password)
                         # Return False to call default page handler.
                         return False
-                    except RdiffError:
+                    except:
                         logger.info('basic auth fail for user: %s', login, exc_info=1)
                         cherrypy.serving.response.headers['www-authenticate'] = (
                             'Basic realm="%s"%s' % ('rdiffweb', 'utf-8')
@@ -235,9 +234,9 @@ class LoginPage(Controller):
     """
     This page is used by the authentication to display enter a user/pass.
     """
-    
+
     _welcome_msg = Option("WelcomeMsg")
-    
+
     def index(self, redirect=b'/', username='', error_msg='', **kwargs):
         # Re-encode the redirect for display in HTML
         redirect = quote_url(redirect, safe=";/?:@&=+$,%")

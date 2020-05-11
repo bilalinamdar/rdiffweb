@@ -25,7 +25,6 @@ from __future__ import unicode_literals
 
 import unittest
 
-from rdiffweb.core import RdiffError
 from rdiffweb.test import AppTestCase
 
 

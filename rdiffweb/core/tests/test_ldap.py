@@ -29,8 +29,7 @@ import unittest
 
 from mockldap import MockLdap
 
-from rdiffweb.core import RdiffError
-from rdiffweb.core.ldap_auth import LdapPasswordStore
+from rdiffweb.core.ldap_auth import LdapPasswordStore, LdapError
 from rdiffweb.test import AppTestCase
 
 
@@ -131,7 +130,7 @@ class UserManagerLdapTest(AppTestCase):
             self.ldapstore.delete_user('eve')
 
     def test_set_password_not_found(self):
-        with self.assertRaises(RdiffError):
+        with self.assertRaises(LdapError):
             self.assertTrue(self.ldapstore.set_password('joe', 'password'))
 
     def test_set_password_update(self):
@@ -141,12 +140,12 @@ class UserManagerLdapTest(AppTestCase):
         self.assertFalse(self.ldapstore.set_password('john', 'new_password', old_password='password'))
 
     def test_set_password_with_invalid_old_password(self):
-        with self.assertRaises(RdiffError):
+        with self.assertRaises(LdapError):
             self.ldapstore.set_password('foo', 'new_password', old_password='invalid')
 
     def test_set_password_update_not_exists(self):
         """Expect error when trying to update password of invalid user."""
-        with self.assertRaises(RdiffError):
+        with self.assertRaises(LdapError):
             self.assertFalse(self.ldapstore.set_password('bar', 'new_password'))
 
 
@@ -200,20 +199,20 @@ class UserManagerLdapNoPasswordChangeTest(AppTestCase):
         AppTestCase.tearDown(self)
 
     def test_set_password_update(self):
-        with self.assertRaises(RdiffError):
+        with self.assertRaises(LdapError):
             self.ldapstore.set_password('annik', 'new_password')
 
     def test_set_password_with_old_password(self):
-        with self.assertRaises(RdiffError):
+        with self.assertRaises(LdapError):
             self.ldapstore.set_password('john', 'new_password', old_password='password')
 
     def test_set_password_with_invalid_old_password(self):
-        with self.assertRaises(RdiffError):
+        with self.assertRaises(LdapError):
             self.ldapstore.set_password('foo', 'new_password', old_password='invalid')
 
     def test_set_password_update_not_exists(self):
         """Expect error when trying to update password of invalid user."""
-        with self.assertRaises(RdiffError):
+        with self.assertRaises(LdapError):
             self.assertFalse(self.ldapstore.set_password('bar', 'new_password'))
 
 
