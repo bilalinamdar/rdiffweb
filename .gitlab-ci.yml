@@ -15,6 +15,8 @@ stages:
 .prebuild:  &prebuild
   image: docker:stable
   stage: prebuild
+  before_script:
+  - docker info
   script:
   - "export BUILD_PATH=extras/prebuild/${CI_JOB_NAME}"
   - "export TAG=$DOCKER_REGISTRY/pdsl/rdiffweb-build:${CI_JOB_NAME}-$CI_PIPELINE_IID"
