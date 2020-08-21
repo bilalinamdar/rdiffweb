@@ -110,8 +110,8 @@ debian10-py3-rdiff-backup2:
     IMAGE: debian10-py3
     TOXENV: py3-cherrypy8-jinja210
   before_script:
-  - apt -y autoremove rdiff-backup
-  - apt-get update && apt -y install librsync-dev
+  - apt-get update
+  - apt -y install librsync-dev
   - pip3 install rdiff-backup
   - tox
 
