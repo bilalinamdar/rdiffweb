@@ -111,7 +111,7 @@ debian10-py3-rdiff-backup2:
     TOXENV: py3-cherrypy8-jinja210
   before_script:
   - apt-get update
-  - apt -y install librsync-dev
+  - apt -y install librsync-dev libldap2-dev libsasl2-dev
   - pip3 install rdiff-backup
   - tox
 
@@ -120,6 +120,8 @@ debian11-py2-cherrypy35-jinja210:
   variables:
     IMAGE: debian11-py2
     TOXENV: py2-cherrypy35-jinja211
+  # Debian11 is running with rdiff-backup2 and we found an encoding issue #108
+  allow_failure: true
     
 debian11-py3-cherrypy8-jinja211: 
   <<: *tox
