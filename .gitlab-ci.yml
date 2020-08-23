@@ -1,5 +1,4 @@
-variables:
-  DOCKER_BUILD_IMAGE: "${CI_REGISTRY_IMAGE}"
+image: ikus060/python:debian9-py3
 
 stages:
 - test
@@ -150,7 +149,7 @@ centos8-py3-cherrypy18-jinja210:
     TOXENV: py3-cherrypy18-jinja210
   
 package:py2: 
-  image: $DOCKER_BUILD_IMAGE:debian9-py2-$CI_PIPELINE_IID
+  image: ikus060/python:debian9-py2
   stage: package
   script:
   - python2 setup.py sdist bdist_wheel
@@ -160,7 +159,6 @@ package:py2:
     - dist/*.whl
     
 package:py3: 
-  image: $DOCKER_BUILD_IMAGE:debian9-py3-$CI_PIPELINE_IID
   stage: package
   script:
   - python3 setup.py sdist bdist_wheel
@@ -183,14 +181,12 @@ publish:sonar:dev:
   - sonar-runner -X -Dsonar.python.coverage.reportPath=coverage-*.xml -Dsonar.python.xunit.reportPath=nosetests-py3-cherrypy18.xml -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=$CI_PROJECT_NAME-dev -Dsonar.exclusions=rdiffweb/controller/tests/**,rdiffweb/core/tests/**,rdiffweb/test.py -Dsonar.sources=.
 
 publish_nexus:
-  image: $DOCKER_BUILD_IMAGE:debian9-py3-$CI_PIPELINE_IID
   stage: publish
   script:
   - pip3 install wheel twine --upgrade
   - twine upload dist/* -u $NEXUS_USR -p $NEXUS_PWD --repository-url $NEXUS_PYPI_URL
 
 publish_pypi:
-  image: $DOCKER_BUILD_IMAGE:debian9-py3-$CI_PIPELINE_IID
   stage: publish
   only:
   - tags
@@ -199,7 +195,6 @@ publish_pypi:
   - twine upload dist/* -u $PYPI_USR -p $PYPI_PWD
   
 deploy_rdiffweb_demo:
-  image: $DOCKER_BUILD_IMAGE:debian9-py3-$CI_PIPELINE_IID
   stage: deploy
   environment:
     name: demo
@@ -211,7 +206,6 @@ deploy_rdiffweb_demo:
   - curl -X POST -F token=36bae86778d901fc6b2d6453a41844 -F "ref=master" -F "variables[RDIFFWEB_VERSION]=$RDIFFWEB_VERSION" https://gitlab.com/api/v4/projects/18716492/trigger/pipeline
 
 bump_minarca_version:
-  image: $DOCKER_BUILD_IMAGE:debian9-py3-$CI_PIPELINE_IID
   stage: downstream
   only:
   - tags
