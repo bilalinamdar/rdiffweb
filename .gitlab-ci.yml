@@ -152,7 +152,9 @@ package:py2:
   image: ikus060/python:debian9-py2
   stage: package
   script:
+  - pip2 install wheel
   - python2 setup.py sdist bdist_wheel
+  dependencies: []
   artifacts:
     paths: 
     - dist/*.tar.gz
@@ -161,7 +163,9 @@ package:py2:
 package:py3: 
   stage: package
   script:
+  - pip3 install wheel
   - python3 setup.py sdist bdist_wheel
+  dependencies: []
   artifacts:
     paths:
     - dist/*.whl
