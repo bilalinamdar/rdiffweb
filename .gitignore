@@ -1,6 +1,6 @@
 *.py[co]
 *.log
-
+*.mo
 # Packages
 *.egg
 *.egg-info
